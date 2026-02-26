@@ -136,7 +136,7 @@
 // ==========================================
 // ⚠️ PASTE V29.0 APPS SCRIPT URL HERE
 // ==========================================
-const API_URL = "YOUR_NEW_APPS_SCRIPT_URL_HERE";
+const API_URL = "https://script.google.com/macros/s/AKfycbwc65ohLozqbOTBrbCEV2aEV9vHSBnWIxXPUpSA1vJyw4lDSt591LsQrhROpkIJFwzo/exec";
 
 function nextStep(stepNum) {
   document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
