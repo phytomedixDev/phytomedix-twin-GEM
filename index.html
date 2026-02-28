@@ -3,153 +3,259 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phytomedix | Deep Consult v29.0</title>
+<title>Phytomedix | Deep Consult + Check-in v29.1</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --forest: #1a3d2b; --green: #2e7d4f; --mint: #e6f5ec; --ink: #1a2332; --slate: #4a5568; --mist: #f4f7f5; --white: #ffffff; --border: #dde5e0; }
-  body { font-family: 'Outfit', sans-serif; background: var(--mist); color: var(--ink); padding: 20px; display: flex; flex-direction: column; align-items: center; }
-  .container { width: 100%; max-width: 650px; }
-  .card { background: var(--white); border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
-  h2 { font-family: 'Syne', sans-serif; color: var(--forest); margin-bottom: 10px; }
+  :root { 
+    --forest: #1a3d2b; --green: #2e7d4f; --leaf: #4caf71; --mint: #e6f5ec; --mint-dark: #c8e6d5; 
+    --gold: #c8a84b; --amber: #d97706; --ink: #1a2332; --slate: #4a5568; --mist: #f4f7f5; 
+    --white: #ffffff; --border: #dde5e0; --red: #c53030; --blue: #2563eb;
+    --acc-color: #166534; --neu-color: #1d4ed8; --slow-color: #92400e; --stag-color: #991b1b;
+  }
+  
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Outfit', sans-serif; background: var(--mist); color: var(--ink); padding: 16px; display: flex; flex-direction: column; align-items: center; }
+  
+  /* Header & Tabs */
+  .site-header { width: 100%; max-width: 700px; display: flex; align-items: center; justify-content: space-between; padding: 20px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 19px; color: var(--forest); letter-spacing: -0.3px; }
+  .logo span { color: var(--leaf); }
+  .engine-badge { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 500; color: var(--green); background: var(--mint); border: 1px solid var(--mint-dark); padding: 4px 10px; border-radius: 20px; }
+  .container { width: 100%; max-width: 700px; }
+  
+  .tab-bar { display: flex; gap: 4px; background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 4px; margin-bottom: 20px; }
+  .tab-btn { flex: 1; padding: 10px 14px; border: none; background: none; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; color: var(--slate); cursor: pointer; border-radius: 10px; transition: all 0.18s; }
+  .tab-btn.active { background: var(--forest); color: var(--white); }
+  
+  /* Cards & Forms */
+  .card { background: var(--white); border-radius: 16px; padding: 24px; box-shadow: 0 1px 8px rgba(0,0,0,0.05), 0 0 0 1px var(--border); margin-bottom: 14px; }
+  h2 { font-family: 'Syne', sans-serif; font-size: 21px; font-weight: 800; color: var(--forest); margin-bottom: 5px; }
+  .subtitle { font-size: 13px; color: var(--slate); margin-bottom: 22px; font-weight: 400; }
+  
   .step { display: none; }
   .step.active { display: block; animation: fadeIn 0.4s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   
   .field-row { margin-bottom: 15px; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  label { font-size: 11px; font-weight: 700; color: var(--slate); text-transform: uppercase; margin-bottom: 6px; display: block; }
-  input[type="text"], input[type="number"], input[type="email"], select { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'Outfit'; }
+  label { font-size: 10px; font-weight: 700; color: var(--slate); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; display: block; }
+  input[type="text"], input[type="number"], input[type="email"], select { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'Outfit'; font-size: 14px; }
   
-  .btn { width: 100%; padding: 14px; background: var(--forest); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 15px; }
+  .btn { width: 100%; padding: 15px; background: var(--forest); color: white; border: none; border-radius: 12px; font-family: 'Syne'; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: all 0.2s; }
+  .btn:hover { background: var(--green); transform: translateY(-1px); }
   .btn-outline { background: white; color: var(--forest); border: 1.5px solid var(--forest); }
   
-  .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .check-label { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+  .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+  .check-label { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 13px; cursor: pointer; user-select: none; }
   .check-label:has(input:checked) { background: var(--mint); border-color: var(--green); }
-  .check-label input { margin: 0; }
+  .check-label input { display: none; }
+  .dot { width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 4px; position: relative; }
+  .check-label input:checked ~ .dot { background: var(--green); border-color: var(--green); }
 
-  /* Dashboard Styles */
-  .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-  .stat-box { background: var(--mint); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid var(--green); }
-  .stat-val { font-size: 24px; font-weight: 800; color: var(--forest); font-family: 'Syne'; }
-  .stat-lbl { font-size: 10px; text-transform: uppercase; color: var(--green); font-weight: 600; }
+  /* Dashboard */
+  #dashboard { display: none; }
+  .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+  .stat-box { background: var(--white); border: 1px solid var(--border); padding: 16px 12px; border-radius: 14px; text-align: center; border-bottom: 3px solid var(--leaf); }
+  .stat-val { font-size: 26px; font-weight: 800; color: var(--forest); font-family: 'Syne'; line-height: 1; }
+  .stat-lbl { font-size: 9px; text-transform: uppercase; color: var(--slate); font-weight: 700; margin-bottom: 7px; letter-spacing: 1px; }
   
-  .supp-card { border: 1px solid var(--border); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--green); }
-  .supp-title { font-weight: 700; font-family: 'Syne'; color: var(--forest); display: flex; justify-content: space-between; }
-  .supp-dose { font-family: 'DM Mono'; font-size: 11px; background: var(--mint); padding: 3px 8px; border-radius: 4px; }
-  .supp-desc { font-size: 12px; color: var(--slate); margin-top: 8px; }
+  .supp-card { border: 1px solid var(--border); padding: 14px; border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--green); }
+  .supp-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+  .supp-name { font-weight: 700; font-family: 'Syne'; color: var(--ink); font-size: 14px; }
+  .supp-dose { font-family: 'DM Mono'; font-size: 10px; background: var(--mint); color: var(--forest); padding: 3px 8px; border-radius: 6px; font-weight: 500; }
+  .supp-desc { font-size: 11px; color: var(--slate); margin-top: 8px; line-height: 1.5; }
+  
+  /* Sliders for Check-in */
+  .slider-group { margin-bottom: 18px; }
+  .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .slider-value { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--green); }
+  input[type="range"] { width: 100%; height: 4px; -webkit-appearance: none; background: var(--border); border-radius: 4px; outline: none; cursor: pointer; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--green); border: 3px solid var(--white); box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+  .slider-ticks { display: flex; justify-content: space-between; margin-top: 4px; }
+  .slider-ticks span { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--slate); }
 </style>
 </head>
 <body>
 
+<header class="site-header">
+  <div class="logo">PHYTO<span>MEDIX</span></div>
+  <div class="header-right"><span class="engine-badge">ENGINE v29.1</span></div>
+</header>
+
 <div class="container">
   
-  <div id="formContainer" class="card">
-    
-    <div class="step active" id="step1">
-      <h2>1. Identity & Biometrics</h2>
-      <p style="font-size:13px; color:var(--slate); margin-bottom:20px;">Establishing physiological baseline.</p>
-      <div class="field-row"><label>Email</label><input type="email" id="email" placeholder="Required for Twin State"></div>
-      <div class="grid-2 field-row">
-        <div><label>Age</label><input type="number" id="Q-001" value="35"></div>
-        <div><label>Biological Sex</label><select id="Q-002"><option>Male</option><option>Female</option></select></div>
-      </div>
-      <div class="grid-2 field-row">
-        <div><label>Height (cm)</label><input type="number" id="Q-019" placeholder="170"></div>
-        <div><label>Weight (kg)</label><input type="number" id="Q-021" placeholder="70"></div>
-      </div>
-      <button class="btn" onclick="nextStep(2)">Next: Lifestyle Load</button>
-    </div>
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" id="tab_assess" onclick="switchTab('assess')"><span class="tab-icon">🧬</span> Deep Consult</button>
+    <button class="tab-btn" id="tab_checkin" onclick="switchTab('checkin')"><span class="tab-icon">🔄</span> Micro Check-in</button>
+  </div>
 
-    <div class="step" id="step2">
-      <h2>2. Environmental Load</h2>
-      <div class="grid-2 field-row">
-        <div><label>Smoking</label><select id="Q-003"><option>Never</option><option>Former</option><option>Current</option></select></div>
-        <div><label>Sleep (Hours)</label><input type="number" id="Q-006" value="7"></div>
-      </div>
-      <div class="field-row">
-        <label>Primary Diet Pattern</label>
-        <select id="Q-007"><option>Balanced</option><option>High carb</option><option>Keto/Low Carb</option></select>
-      </div>
-      <div class="field-row">
-        <label>Daily Energy Levels</label>
-        <select id="Q-017"><option>High</option><option>Afternoon crashes</option><option>Chronic exhaustion</option></select>
-      </div>
-      <button class="btn" onclick="nextStep(3)">Next: Clinical Signals</button>
-      <button class="btn btn-outline" onclick="nextStep(1)">Back</button>
-    </div>
-
-    <div class="step" id="step3">
-      <h2>3. Clinical Diagnostics</h2>
+  <div id="assessTab">
+    <div id="formContainer" class="card">
       
-      <label>Diagnosed Conditions</label>
-      <div class="check-grid field-row" id="Q-010-group">
-        <label class="check-label"><input type="checkbox" value="Diabetes"> Diabetes Type 2</label>
-        <label class="check-label"><input type="checkbox" value="Hypertension"> Hypertension</label>
-        <label class="check-label"><input type="checkbox" value="High Cholesterol"> High Cholesterol</label>
-        <label class="check-label"><input type="checkbox" value="PCOS"> PCOS</label>
-        <label class="check-label"><input type="checkbox" value="IBS"> IBS</label>
-        <label class="check-label"><input type="checkbox" value="Osteoarthritis"> Osteoarthritis</label>
+      <div class="step active" id="step1">
+        <h2>1. Identity & Biometrics</h2>
+        <p class="subtitle">Establishing physiological baseline.</p>
+        <div class="field-row"><label>Email</label><input type="email" id="email" placeholder="your@email.com"></div>
+        <div class="grid-2 field-row">
+          <div><label>Age</label><input type="number" id="Q-001" value="35"></div>
+          <div><label>Biological Sex</label><select id="Q-002"><option>Male</option><option>Female</option></select></div>
+        </div>
+        <div class="grid-2 field-row">
+          <div><label>Height (cm)</label><input type="number" id="Q-019" placeholder="170"></div>
+          <div><label>Weight (kg)</label><input type="number" id="Q-021" placeholder="70"></div>
+        </div>
+        <button class="btn" onclick="nextStep(2)">Next: Lifestyle Load</button>
       </div>
 
-      <label>Symptom Severity</label>
-      <div class="grid-2 field-row">
-        <div><label>Joint Pain</label><select id="Q-014"><option>None</option><option>Occasional</option><option>Daily</option></select></div>
-        <div><label>Gut Issues</label><select id="Q-015"><option>None</option><option>Occasional</option><option>Chronic</option></select></div>
+      <div class="step" id="step2">
+        <h2>2. Environmental Load</h2>
+        <p class="subtitle">Mapping your daily friction.</p>
+        <div class="grid-2 field-row">
+          <div><label>Smoking</label><select id="Q-003"><option>Never</option><option>Former</option><option>Current</option></select></div>
+          <div><label>Sleep (Hours)</label><input type="number" id="Q-006" value="7"></div>
+        </div>
+        <div class="field-row">
+          <label>Primary Diet Pattern</label>
+          <select id="Q-007"><option>Balanced</option><option>High carb</option><option>Keto/Low Carb</option></select>
+        </div>
+        <div class="field-row">
+          <label>Daily Energy Levels</label>
+          <select id="Q-017"><option>High</option><option>Afternoon crashes</option><option>Chronic exhaustion</option></select>
+        </div>
+        <button class="btn" onclick="nextStep(3)">Next: Clinical Signals</button>
+        <button class="btn btn-outline" onclick="nextStep(1)">Back</button>
       </div>
 
-      <label>Known Lab Values (Optional)</label>
-      <div class="grid-2 field-row">
-        <div><label>Systolic BP (top number)</label><input type="number" id="Q-020" placeholder="e.g. 120"></div>
-        <div><label>Fasting Glucose (mg/dL)</label><input type="number" id="Q-022" placeholder="e.g. 95"></div>
-      </div>
+      <div class="step" id="step3">
+        <h2>3. Clinical Diagnostics</h2>
+        <p class="subtitle">Identifying systemic roadblocks.</p>
+        
+        <label>Diagnosed Conditions</label>
+        <div class="check-grid" id="Q-010-group">
+          <label class="check-label"><input type="checkbox" value="Diabetes"><span class="dot"></span> 🩸 Diabetes Type 2</label>
+          <label class="check-label"><input type="checkbox" value="Hypertension"><span class="dot"></span> ❤️ Hypertension</label>
+          <label class="check-label"><input type="checkbox" value="High Cholesterol"><span class="dot"></span> 🫀 High Cholesterol</label>
+          <label class="check-label"><input type="checkbox" value="PCOS"><span class="dot"></span> ⚡ PCOS</label>
+          <label class="check-label"><input type="checkbox" value="IBS"><span class="dot"></span> 🌿 IBS</label>
+          <label class="check-label"><input type="checkbox" value="Osteoarthritis"><span class="dot"></span> 🦴 Osteoarthritis</label>
+        </div>
 
-      <button class="btn" id="submitBtn" onclick="runEngine()">Generate Clinical Protocol</button>
-      <button class="btn btn-outline" onclick="nextStep(2)">Back</button>
+        <div class="grid-2 field-row" style="margin-top:15px;">
+          <div><label>Joint Pain Severity</label><select id="Q-014"><option>None</option><option>Occasional</option><option>Daily</option></select></div>
+          <div><label>Gut Issues</label><select id="Q-015"><option>None</option><option>Occasional</option><option>Chronic</option></select></div>
+        </div>
+
+        <label>Known Lab Values (Optional)</label>
+        <div class="grid-2 field-row">
+          <div><label>Systolic BP (top #)</label><input type="number" id="Q-020" placeholder="e.g. 120"></div>
+          <div><label>Fasting Glucose</label><input type="number" id="Q-022" placeholder="e.g. 95"></div>
+        </div>
+
+        <button class="btn" id="submitBtn" onclick="runEngine()">Generate Clinical Protocol</button>
+        <button class="btn btn-outline" onclick="nextStep(2)">Back</button>
+      </div>
+    </div>
+
+    <div id="dashboard">
+      <div class="dash-grid">
+        <div class="stat-box"><div class="stat-lbl">Systemic Risk Load</div><div class="stat-val" id="d_score">--</div></div>
+        <div class="stat-box"><div class="stat-lbl">Biological Age</div><div class="stat-val" id="d_age">--</div></div>
+      </div>
+      
+      <div class="card" style="padding:15px;"><canvas id="radarChart"></canvas></div>
+      
+      <div class="card">
+        <h2 style="font-size:16px; margin-bottom:15px;">☀️ Morning Protocol</h2>
+        <div id="am_list"></div>
+      </div>
+      
+      <div class="card">
+        <h2 style="font-size:16px; margin-bottom:15px;">🌙 Evening Protocol</h2>
+        <div id="pm_list"></div>
+      </div>
+      
+      <button class="btn btn-outline" onclick="location.reload()">New Assessment</button>
     </div>
   </div>
 
-  <div id="dashboard" style="display:none;">
-    <div class="dash-grid">
-      <div class="stat-box"><div class="stat-lbl">Systemic Risk Load</div><div class="stat-val" id="d_score">--</div></div>
-      <div class="stat-box"><div class="stat-lbl">Biological Age</div><div class="stat-val" id="d_age">--</div></div>
-    </div>
-    
-    <div class="card"><canvas id="radarChart"></canvas></div>
-    
+  <div id="checkinTab" style="display:none;">
     <div class="card">
-      <h2>☀️ AM Protocol</h2>
-      <div id="am_list"></div>
+      <h2>Recalibrate My Twin</h2>
+      <p class="subtitle">Log your week to adjust your biological trajectory.</p>
+
+      <div class="field-row" style="margin-bottom:20px;">
+        <label>Email (Used in Assessment)</label>
+        <input type="email" id="ci_email" placeholder="your@email.com">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header"><label style="margin:0;">⚡ Daily Energy</label><span class="slider-value" id="lbl_energy">7 / 10</span></div>
+        <input type="range" id="ci_energy" min="1" max="10" value="7" oninput="updatePreview('energy')">
+        <div class="slider-ticks"><span>1</span><span>5</span><span>10</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header"><label style="margin:0;">🌙 Sleep Quality</label><span class="slider-value" id="lbl_sleep">7 / 10</span></div>
+        <input type="range" id="ci_sleep" min="1" max="10" value="7" oninput="updatePreview('sleep')">
+        <div class="slider-ticks"><span>1</span><span>5</span><span>10</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header"><label style="margin:0;">😮‍💨 Stress Level</label><span class="slider-value" id="lbl_stress">4 / 10</span></div>
+        <input type="range" id="ci_stress" min="1" max="10" value="4" oninput="updatePreview('stress')">
+        <div class="slider-ticks"><span>1</span><span>5</span><span>10</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header"><label style="margin:0;">💊 Protocol Adherence</label><span class="slider-value" id="lbl_adherence">80 %</span></div>
+        <input type="range" id="ci_adherence" min="1" max="10" value="8" oninput="updatePreview('adherence')">
+        <div class="slider-ticks"><span>10%</span><span>50%</span><span>100%</span></div>
+      </div>
+
+      <button class="btn" id="checkinBtn" onclick="runCheckin()">Submit Check-In</button>
+      
+      <div id="ci_result" style="display:none; margin-top:20px; padding:15px; background:var(--mint); border-radius:10px; border:1px solid var(--green);">
+        <h3 style="font-family:'Syne'; color:var(--forest); font-size:14px; margin-bottom:5px;">✅ Trajectory Updated</h3>
+        <p style="font-size:13px; color:var(--slate);">Your adherence data has been logged to your Twin State. The engine will use this to adjust your next cycle's formulations.</p>
+      </div>
     </div>
-    
-    <div class="card">
-      <h2>🌙 PM Protocol</h2>
-      <div id="pm_list"></div>
-    </div>
-    
-    <button class="btn btn-outline" onclick="location.reload()">New Assessment</button>
   </div>
+
 </div>
 
 <script>
 // ==========================================
 // ⚠️ PASTE V29.0 APPS SCRIPT URL HERE
 // ==========================================
-const API_URL = "https://script.google.com/macros/s/AKfycbwc65ohLozqbOTBrbCEV2aEV9vHSBnWIxXPUpSA1vJyw4lDSt591LsQrhROpkIJFwzo/exec";
+const API_URL = "YOUR_NEW_APPS_SCRIPT_URL_HERE";
+
+function switchTab(tab) {
+  document.getElementById("assessTab").style.display  = tab === "assess"  ? "" : "none";
+  document.getElementById("checkinTab").style.display = tab === "checkin" ? "" : "none";
+  document.getElementById("tab_assess").classList.toggle("active",  tab === "assess");
+  document.getElementById("tab_checkin").classList.toggle("active", tab === "checkin");
+}
 
 function nextStep(stepNum) {
   document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
   document.getElementById('step' + stepNum).classList.add('active');
 }
 
+function updatePreview(type) {
+  if(type === 'energy') document.getElementById("lbl_energy").textContent = document.getElementById("ci_energy").value + " / 10";
+  if(type === 'sleep') document.getElementById("lbl_sleep").textContent = document.getElementById("ci_sleep").value + " / 10";
+  if(type === 'stress') document.getElementById("lbl_stress").textContent = document.getElementById("ci_stress").value + " / 10";
+  if(type === 'adherence') document.getElementById("lbl_adherence").textContent = (document.getElementById("ci_adherence").value * 10) + " %";
+}
+
+// === RUN ASSESSMENT ===
 function runEngine() {
   const email = document.getElementById("email").value;
   if(!email) { alert("Email required."); return; }
   
   document.getElementById("submitBtn").innerText = "Analyzing 22-Point Matrix...";
 
-  // Gather checkboxes
   const q10 = [];
   document.querySelectorAll('#Q-010-group input:checked').forEach(cb => q10.push(cb.value));
 
@@ -170,14 +276,69 @@ function runEngine() {
     "Q-010": q10.join("; ")
   };
 
-  // JSONP Bypass
+  jsonpCall(payload, function(data) {
+    if(data.status === "success") {
+      document.getElementById("ci_email").value = email; // Prefill check-in tab
+      renderDashboard(data.output);
+    } else { 
+      alert("Engine Error: " + data.message); 
+      document.getElementById("submitBtn").innerText = "Retry"; 
+    }
+  });
+}
+
+// === RUN CHECK-IN (Upgraded to show dynamic data) ===
+function runCheckin() {
+  const email = document.getElementById("ci_email").value;
+  if(!email) { alert("Email required."); return; }
+  
+  document.getElementById("checkinBtn").innerText = "Logging...";
+
+  const payload = {
+    action: "checkin",
+    email: email,
+    adherence: (document.getElementById("ci_adherence").value * 10),
+    energy_score: document.getElementById("ci_energy").value,
+    sleep_quality: document.getElementById("ci_sleep").value,
+    stress_level: document.getElementById("ci_stress").value
+  };
+
+  jsonpCall(payload, function(data) {
+    document.getElementById("checkinBtn").innerText = "Submit Check-In";
+    if(data.status === "success") {
+      
+      // We dynamically inject the new trajectory data returned from the v29.1 backend
+      const resultBox = document.getElementById("ci_result");
+      const out = data.output;
+      
+      let momSign = out.momentum >= 0 ? "+" : "";
+      
+      resultBox.innerHTML = `
+        <h3 style="font-family:'Syne'; color:var(--forest); font-size:14px; margin-bottom:10px;">✅ Trajectory Updated</h3>
+        <table style="width:100%; border-collapse:collapse; font-size:13px; color:var(--slate);">
+          <tr><td style="padding:4px 0;">New Lifecycle:</td><td style="font-weight:700; color:var(--forest); text-align:right;">${out.lifecycle}</td></tr>
+          <tr><td style="padding:4px 0;">90-Day Projection:</td><td style="font-weight:700; color:var(--forest); text-align:right;">${out.projection90d}/100</td></tr>
+          <tr><td style="padding:4px 0;">Momentum Shift:</td><td style="font-weight:700; color:var(--green); text-align:right;">${momSign}${out.momentum}</td></tr>
+        </table>
+        <p style="font-size:12px; margin-top:10px; font-style:italic;">${out.coachMessage}</p>
+      `;
+      
+      resultBox.style.display = "block";
+      
+    } else { 
+      alert("Error: " + data.message); 
+    }
+  });
+}
+
+function jsonpCall(payload, callback) {
   const encodedPayload = encodeURIComponent(JSON.stringify(payload));
   const callbackName = 'jsoncb_' + Math.round(100000 * Math.random());
   
   window[callbackName] = function(data) {
       delete window[callbackName];
-      if(data.status === "success") renderDashboard(data.output);
-      else { alert("Engine Error."); document.getElementById("submitBtn").innerText = "Retry"; }
+      document.body.removeChild(script);
+      callback(data);
   };
 
   const script = document.createElement('script');
@@ -189,15 +350,15 @@ function renderDashboard(data) {
   document.getElementById("formContainer").style.display = "none";
   document.getElementById("dashboard").style.display = "block";
 
-  document.getElementById("d_score").innerText = data.overallScore + "/100";
+  document.getElementById("d_score").innerText = data.overallScore;
   document.getElementById("d_age").innerText = data.biologicalAge.toFixed(1);
 
   const renderStack = (list, id) => {
     const el = document.getElementById(id);
-    if(!list.length) { el.innerHTML = "<p>No supplements required.</p>"; return; }
+    if(!list.length) { el.innerHTML = "<p style='font-size:12px; color:gray;'>No supplements required.</p>"; return; }
     el.innerHTML = list.map(i => `
       <div class="supp-card">
-        <div class="supp-title"><span>${i.name}</span> <span class="supp-dose">${i.dose} (${i.final_dose_mg}mg)</span></div>
+        <div class="supp-top"><span class="supp-name">${i.name}</span> <span class="supp-dose">${i.dose} ${i.final_dose_mg ? '('+i.final_dose_mg+'mg)' : ''}</span></div>
         <div class="supp-desc"><b>Mechanism:</b> ${i.why}<br><span style="color:var(--red)"><b>Safety:</b> ${i.safety}</span></div>
       </div>
     `).join("");
@@ -210,9 +371,9 @@ function renderDashboard(data) {
     type: "radar",
     data: {
       labels: ["Metabolic", "Cardio", "Cognitive", "Joints", "Gut", "Hormonal"],
-      datasets: [{ label: "Load", data: [data.scores.metabolic, data.scores.cardio, data.scores.cognitive, data.scores.joints, data.scores.gut, data.scores.hormonal], borderColor: "#2e7d4f", backgroundColor: "rgba(46,125,79,0.2)" }]
+      datasets: [{ label: "Load", data: [data.scores.metabolic, data.scores.cardio, data.scores.cognitive, data.scores.joints, data.scores.gut, data.scores.hormonal], borderColor: "#2e7d4f", backgroundColor: "rgba(46,125,79,0.2)", pointBackgroundColor: "#2e7d4f" }]
     },
-    options: { scales: { r: { min: 0, max: 100 } } }
+    options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } }, plugins: { legend: { display: false } } }
   });
 }
 </script>
