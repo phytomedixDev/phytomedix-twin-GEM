@@ -335,6 +335,7 @@ function jsonpCall(payload, callback) {
   const encodedPayload = encodeURIComponent(JSON.stringify(payload));
   const callbackName = 'jsoncb_' + Math.round(100000 * Math.random());
   
+  // What happens when it succeeds
   window[callbackName] = function(data) {
       delete window[callbackName];
       document.body.removeChild(script);
@@ -343,6 +344,18 @@ function jsonpCall(payload, callback) {
 
   const script = document.createElement('script');
   script.src = API_URL + "?payload=" + encodedPayload + "&callback=" + callbackName;
+  
+  // ERROR CATCHER: What happens if Google rejects the connection
+  script.onerror = function() {
+      delete window[callbackName];
+      document.body.removeChild(script);
+      alert("⚠️ Connection Blocked. Please ensure your Google Apps Script is deployed with 'Who has access: Anyone'.");
+      
+      // Reset the buttons so they aren't stuck
+      document.getElementById("submitBtn").innerText = "Generate Clinical Protocol";
+      document.getElementById("checkinBtn").innerText = "Submit Check-In";
+  };
+  
   document.body.appendChild(script);
 }
 
