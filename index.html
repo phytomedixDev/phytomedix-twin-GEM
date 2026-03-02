@@ -287,7 +287,7 @@ function runEngine() {
   });
 }
 
-// === RUN CHECK-IN (Upgraded to show dynamic data) ===
+// === RUN CHECK-IN ===
 function runCheckin() {
   const email = document.getElementById("ci_email").value;
   if(!email) { alert("Email required."); return; }
@@ -307,10 +307,8 @@ function runCheckin() {
     document.getElementById("checkinBtn").innerText = "Submit Check-In";
     if(data.status === "success") {
       
-      // We dynamically inject the new trajectory data returned from the v29.1 backend
       const resultBox = document.getElementById("ci_result");
       const out = data.output;
-      
       let momSign = out.momentum >= 0 ? "+" : "";
       
       resultBox.innerHTML = `
@@ -322,7 +320,6 @@ function runCheckin() {
         </table>
         <p style="font-size:12px; margin-top:10px; font-style:italic;">${out.coachMessage}</p>
       `;
-      
       resultBox.style.display = "block";
       
     } else { 
@@ -331,6 +328,7 @@ function runCheckin() {
   });
 }
 
+// === UNIVERSAL MOBILE-SAFE JSONP CALL ===
 function jsonpCall(payload, callback) {
   const encodedPayload = encodeURIComponent(JSON.stringify(payload));
   const callbackName = 'jsoncb_' + Math.round(100000 * Math.random());
@@ -338,17 +336,19 @@ function jsonpCall(payload, callback) {
   // What happens when it succeeds
   window[callbackName] = function(data) {
       delete window[callbackName];
-      document.body.removeChild(script);
+      document.head.removeChild(script); // 📱 FIXED FOR MOBILE
       callback(data);
   };
 
   const script = document.createElement('script');
-  script.src = API_URL + "?payload=" + encodedPayload + "&callback=" + callbackName;
+  // Add a cache-buster timestamp specifically for mobile browsers
+  const cacheBuster = "&t=" + new Date().getTime();
+  script.src = API_URL + "?payload=" + encodedPayload + "&callback=" + callbackName + cacheBuster;
   
-  // ERROR CATCHER: What happens if Google rejects the connection
+  // ERROR CATCHER
   script.onerror = function() {
       delete window[callbackName];
-      document.body.removeChild(script);
+      document.head.removeChild(script); // 📱 FIXED FOR MOBILE
       alert("⚠️ Connection Blocked. Please ensure your Google Apps Script is deployed with 'Who has access: Anyone'.");
       
       // Reset the buttons so they aren't stuck
@@ -356,7 +356,8 @@ function jsonpCall(payload, callback) {
       document.getElementById("checkinBtn").innerText = "Submit Check-In";
   };
   
-  document.body.appendChild(script);
+  // 📱 FIXED FOR MOBILE: Append to HEAD, not BODY. Mobile Safari prefers this.
+  document.head.appendChild(script);
 }
 
 function renderDashboard(data) {
