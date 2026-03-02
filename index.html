@@ -276,7 +276,8 @@ function runEngine() {
     "Q-010": q10.join("; ")
   };
 
-  jsonpCall(payload, function(data) {
+  // ✅ USING THE NEW FETCH API
+  fetchCall(payload, function(data) {
     if(data.status === "success") {
       document.getElementById("ci_email").value = email; // Prefill check-in tab
       renderDashboard(data.output);
@@ -303,7 +304,8 @@ function runCheckin() {
     stress_level: document.getElementById("ci_stress").value
   };
 
-  jsonpCall(payload, function(data) {
+  // ✅ USING THE NEW FETCH API
+  fetchCall(payload, function(data) {
     document.getElementById("checkinBtn").innerText = "Submit Check-In";
     if(data.status === "success") {
       
@@ -328,36 +330,33 @@ function runCheckin() {
   });
 }
 
-// === UNIVERSAL MOBILE-SAFE JSONP CALL ===
-function jsonpCall(payload, callback) {
-  const encodedPayload = encodeURIComponent(JSON.stringify(payload));
-  const callbackName = 'jsoncb_' + Math.round(100000 * Math.random());
-  
-  // What happens when it succeeds
-  window[callbackName] = function(data) {
-      delete window[callbackName];
-      document.head.removeChild(script); // 📱 FIXED FOR MOBILE
-      callback(data);
-  };
+// === UPGRADED: MODERN NATIVE FETCH API (100% MOBILE SAFE) ===
+async function fetchCall(payload, callback) {
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      // Using text/plain is the magic key to bypass Google's strict CORS rules
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+      body: JSON.stringify(payload)
+    });
 
-  const script = document.createElement('script');
-  // Add a cache-buster timestamp specifically for mobile browsers
-  const cacheBuster = "&t=" + new Date().getTime();
-  script.src = API_URL + "?payload=" + encodedPayload + "&callback=" + callbackName + cacheBuster;
-  
-  // ERROR CATCHER
-  script.onerror = function() {
-      delete window[callbackName];
-      document.head.removeChild(script); // 📱 FIXED FOR MOBILE
-      alert("⚠️ Connection Blocked. Please ensure your Google Apps Script is deployed with 'Who has access: Anyone'.");
-      
-      // Reset the buttons so they aren't stuck
-      document.getElementById("submitBtn").innerText = "Generate Clinical Protocol";
-      document.getElementById("checkinBtn").innerText = "Submit Check-In";
-  };
-  
-  // 📱 FIXED FOR MOBILE: Append to HEAD, not BODY. Mobile Safari prefers this.
-  document.head.appendChild(script);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    callback(data);
+    
+  } catch (error) {
+    console.error("Fetch Error:", error);
+    alert("⚠️ Connection Issue. Please ensure you have internet access and try again.");
+    
+    // Reset the buttons
+    document.getElementById("submitBtn").innerText = "Generate Clinical Protocol";
+    document.getElementById("checkinBtn").innerText = "Submit Check-In";
+  }
 }
 
 function renderDashboard(data) {
